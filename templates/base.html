@@ -1,0 +1,19 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Sistema ACME</title>
+    <link rel="stylesheet" href="{% static 'styles.css' %}" />
+  </head>
+  <body>
+    <div class="container">
+      <h1 class="title">Sistema de Inventario y Facturación ACME</h1>
+
+      <hr style="margin: 20px 0" />
+
+      {% block content %} {% endblock %}
+    </div>
+  </body>
+</html>
