@@ -1,0 +1,40 @@
+{% extends "base.html" %} {% block content %}
+
+<h2>Factura {{ factura.numero_factura }}</h2>
+
+<p>Fecha: {{ factura.fecha }}</p>
+<p>Cliente: {{ factura.cliente.nombre }}</p>
+<p>Dirección: {{ factura.cliente.direccion }}</p>
+<p>Teléfono: {{ factura.cliente.telefono }}</p>
+<p>Método de pago: {{ factura.metodo_pago }}</p>
+
+<hr />
+
+<table border="1" width="100%">
+  <thead>
+    <tr>
+      <th>Producto</th>
+      <th>Cantidad</th>
+      <th>Precio U.</th>
+      <th>Subtotal</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for d in detalles %}
+    <tr>
+      <td>{{ d.producto.nombre }}</td>
+      <td>{{ d.cantidad }}</td>
+      <td>{{ d.precio_unitario }}</td>
+      <td>{{ d.subtotal }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<hr />
+
+<p>Subtotal: {{ factura.subtotal }}</p>
+<p>ITBIS: {{ factura.itbis }}</p>
+<p><strong>Total: {{ factura.total }}</strong></p>
+
+{% endblock %}

@@ -1,0 +1,26 @@
+{% extends "base.html" %} {% block content %}
+
+<h2>Reporte de Facturas</h2>
+
+<table border="1" width="100%">
+  <thead>
+    <tr>
+      <th>Número</th>
+      <th>Fecha</th>
+      <th>Cliente</th>
+      <th>Total</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for f in facturas %}
+    <tr>
+      <td><a href="/facturacion/{{ f.numero_factura }}/"> {{ f.numero_factura }} </a></td>
+      <td>{{ f.fecha }}</td>
+      <td>{{ f.cliente.nombre }}</td>
+      <td>{{ f.total }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+{% endblock %}

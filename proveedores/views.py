@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect
 from .forms import ProveedorForm
+from .models import Proveedor
 
 
 def crear_proveedor(request):
@@ -12,3 +13,12 @@ def crear_proveedor(request):
         form = ProveedorForm()
 
     return render(request, "proveedor_form.html", {"form": form})
+
+
+def reporte_proveedores(request):
+    proveedores = Proveedor.objects.order_by("nombre")
+    return render(request, "reporte_proveedores.html", {"proveedores": proveedores})
+
+
+def menu_proveedores(request):
+    return render(request, "proveedores_menu.html")
