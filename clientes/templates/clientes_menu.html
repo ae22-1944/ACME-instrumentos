@@ -3,9 +3,43 @@
 <h2>Clientes</h2>
 
 <ul>
-  <li><a href="/clientes/nuevo/">Registrar cliente</a></li>
-  <li><a href="/clientes/reporte/">Reporte de clientes</a></li>
-  <li><a href="/">Volver al inicio</a></li>
+  <li><a href="{% url 'crear_cliente' %}">Registrar cliente</a></li>
+  <li><a href="{% url 'reporte_clientes' %}">Reporte clientes</a></li>
 </ul>
+
+<table border="1" width="100%">
+  <thead>
+    <tr>
+      <th>Nombre</th>
+      <th>Dirección</th>
+      <th>Teléfono</th>
+      <th>Correo</th>
+      <th>Estado</th>
+      <th>Acciones</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for c in clientes %}
+    <tr>
+      <td><a href="{% url 'cliente_detalle' c.pk %}">{{ c.nombre }}</a></td>
+      <td>{{ c.direccion }}</td>
+      <td>{{ c.telefono }}</td>
+      <td>{{ c.correo }}</td>
+      <td>{{ c.estado }}</td>
+      <td>
+        <form action="{% url 'borrar_cliente' c.pk %}" method="POST">
+          {% csrf_token %}
+          <button
+            type="submit"
+            onclick="return confirm('¿Seguro que deseas borrar este cliente?');"
+          >
+            Borrar
+          </button>
+        </form>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
 
 {% endblock %}

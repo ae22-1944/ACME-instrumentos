@@ -5,4 +5,34 @@
   {% csrf_token %} {{ form.as_p }}
   <button type="submit">Guardar Categoría</button>
 </form>
+
+<h3>Categorías</h3>
+
+<table border="1" width="100%">
+  <thead>
+    <tr>
+      <th>Descripción</th>
+      <th>Acciones</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for c in categorias %}
+    <tr>
+      <td>{{ c.descripcion }}</td>
+      <td>
+        <form action="{% url 'borrar_categoria' c.pk %}" method="POST" style="display: inline">
+          {% csrf_token %}
+          <button
+            type="submit"
+            onclick="return confirm('¿Seguro que deseas borrar esta categoría?');"
+          >
+            Borrar
+          </button>
+        </form>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
 {% endblock %}

@@ -1,13 +1,21 @@
-{% extends "base.html" %} {% block content %}
-
-<h1>ACME Instrumentos</h1>
+{% extends "base.html" %}{% load auth_extras %} {% block content %}
 
 <ul>
-  <li><a href="/admin/">Administración</a></li>
-  <li><a href="/clientes/">Clientes</a></li>
-  <li><a href="/proveedores/">Proveedores</a></li>
-  <li><a href="/inventario/">Inventario</a></li>
-  <li><a href="/facturacion/nuevo">Facturación</a></li>
+  {% if user.is_superuser or user|has_group:"Administrador" %}
+  <li><a href="{% url 'admin:index' %}">Administración</a></li>
+  <li><a href="{% url 'ventas' %}">Ventas</a></li>
+  <li><a href="{% url 'clientes' %}">Clientes</a></li>
+  <li><a href="{% url 'proveedores' %}">Proveedores</a></li>
+  <li><a href="{% url 'inventario' %}">Inventario</a></li>
+  <li><a href="{% url 'crear_factura' %}">Facturación</a></li>
+  {% else %} {% if user|has_group:"Comprador" %}
+  <li><a href="{% url 'inventario' %}">Inventario</a></li>
+  <li><a href="{% url 'proveedores' %}">Proveedores</a></li>
+  {% endif %} {% if user|has_group:"Facturador" %}
+  <li><a href="{% url 'crear_factura' %}">Facturación</a></li>
+  <li><a href="{% url 'clientes' %}">Clientes</a></li>
+  <li><a href="{% url 'ventas' %}">Ventas</a></li>
+  {% endif %} {% endif %}
 </ul>
 
 {% endblock %}

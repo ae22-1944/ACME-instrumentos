@@ -1,7 +1,7 @@
 {% extends "base.html" %} {% block content %}
 <h2>Registrar Producto</h2>
 
-<form method="POST">
+<form method="POST" enctype="multipart/form-data">
   {% csrf_token %} {{ form.as_p }}
   <button type="submit">Guardar Producto</button>
 </form>

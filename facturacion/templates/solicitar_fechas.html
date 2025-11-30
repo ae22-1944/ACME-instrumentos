@@ -1,0 +1,19 @@
+{% extends "base.html" %} {% block content %}
+<h2>Generar Reporte de Ventas por Rango de Fechas</h2>
+
+<form method="post" action="{% url 'reporte_ventas' %}">
+  {% csrf_token %}
+
+  <label for="fecha_inicio">Fecha de Inicio:</label>
+  <input type="date" id="fecha_inicio" name="fecha_inicio" required />
+
+  <br /><br />
+
+  <label for="fecha_fin">Fecha de Fin:</label>
+  <input type="date" id="fecha_fin" name="fecha_fin" required />
+
+  <br /><br />
+
+  <button type="submit">Generar PDF de Ventas</button>
+</form>
+{% endblock %}

@@ -3,12 +3,16 @@ from decimal import Decimal, ROUND_HALF_UP
 from django.shortcuts import get_object_or_404, render, redirect
 from django.db import transaction
 from django.contrib import messages
-from django.utils import timezone
+from django.http import FileResponse
+from django.db.models import Sum
+from .utils import generar_pdf_factura
+from datetime import datetime, date
 
 from .forms import FacturaForm, ProductoEnFacturaForm
 from inventario.models import Producto
 from .models import Factura, DetalleFactura
 from clientes.models import Cliente
+from reportes.ventas_pdf import generar_pdf_ventas
 
 ITBIS_RATE = Decimal("0.18")
 
@@ -113,10 +117,16 @@ def crear_factura(request):
                     producto.stock_actual -= det["cantidad"]
                     producto.save()
 
-            messages.success(
-                request, f"Factura {factura.numero_factura} creada correctamente."
+            cliente = factura.cliente if factura.cliente else None
+
+            pdf_buffer = generar_pdf_factura(
+                factura,
+                cliente,
+                DetalleFactura.objects.filter(factura=factura),
             )
-            return redirect("crear_factura")
+
+            filename = f"{factura.numero_factura}.pdf"
+            return FileResponse(pdf_buffer, as_attachment=True, filename=filename)
 
     # GET (mostrar formulario vacío)
     factura_form = FacturaForm(clientes_qs=clientes_qs)
@@ -134,7 +144,9 @@ def crear_factura(request):
 
 
 def factura_detalle(request, numero_factura):
-    factura = get_object_or_404(Factura, numero_factura=numero_factura)
+    factura = get_object_or_404(
+        Factura.objects.select_related("cliente"), numero_factura=numero_factura
+    )
     detalles = DetalleFactura.objects.filter(factura=factura)
     return render(
         request,
@@ -148,10 +160,51 @@ def reporte_facturas(request):
     return render(request, "reporte_facturas.html", {"facturas": facturas})
 
 
+def descargar_factura(request, numero_factura):
+    factura = get_object_or_404(
+        Factura.objects.select_related("cliente"), numero_factura=numero_factura
+    )
+    cliente = factura.cliente if factura.cliente else None
+    detalles = DetalleFactura.objects.filter(factura=factura)
+
+    pdf = generar_pdf_factura(factura, cliente, detalles)
+
+    return FileResponse(
+        pdf, as_attachment=True, filename=f"{factura.numero_factura}.pdf"
+    )
+
+
+def solicitar_fechas_ventas(request):
+    return render(request, "solicitar_fechas.html")
+
+
+# View 2: Procesa las fechas y genera el PDF
 def reporte_ventas(request):
-    ventas = Factura.objects.order_by("-fecha")
-    return render(request, "reporte_ventas.html", {"ventas": ventas})
+    if request.method == "POST":
+        # 1. Obtener las fechas del formulario POST
+        fecha_inicio_str = request.POST.get("fecha_inicio")
+        fecha_fin_str = request.POST.get("fecha_fin")
 
+        try:
+            # Convertir strings a objetos date
+            fecha_inicio = datetime.strptime(fecha_inicio_str, "%Y-%m-%d").date()
+            # Añadir un día a la fecha fin para incluir las ventas de ese día completo
+            fecha_fin = datetime.strptime(fecha_fin_str, "%Y-%m-%d").date()
+        except (ValueError, TypeError):
+            # Manejar error si las fechas no son válidas
+            return render(request, "error.html", {"mensaje": "Fechas no válidas."})
 
-def menu_facturacion(request):
-    return render(request, "menus/facturacion_menu.html")
+        # 2. Filtrar las ventas
+        ventas_filtradas = Factura.objects.filter(
+            fecha__range=[fecha_inicio, fecha_fin]
+        ).order_by("fecha")
+
+        # 3. Generar el PDF
+        pdf = generar_pdf_ventas(ventas_filtradas, fecha_inicio, fecha_fin)
+
+        filename = f"reporte_ventas_{fecha_inicio_str}_a_{fecha_fin_str}.pdf"
+
+        return FileResponse(pdf, as_attachment=True, filename=filename)
+
+    # Si alguien intenta acceder directamente vía GET, redirigir al formulario
+    return redirect("solicitar_fechas_ventas")

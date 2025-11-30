@@ -5,11 +5,17 @@ class Factura(models.Model):
     id_factura = models.AutoField(primary_key=True)
     numero_factura = models.CharField(max_length=20)
     fecha = models.DateTimeField(auto_now_add=True)
-    cliente = models.ForeignKey("clientes.Cliente", on_delete=models.CASCADE)
+    cliente = models.ForeignKey(
+        "clientes.Cliente", on_delete=models.SET_NULL, null=True, blank=True
+    )
     metodo_pago = models.CharField(max_length=20)
     subtotal = models.DecimalField(max_digits=10, decimal_places=2)
     itbis = models.DecimalField(max_digits=10, decimal_places=2)
     total = models.DecimalField(max_digits=10, decimal_places=2)
+
+    @property
+    def nombre_cliente(self):
+        return self.cliente.nombre if self.cliente else "Cliente Genérico"
 
     def save(self, *args, **kwargs):
         if not self.numero_factura:

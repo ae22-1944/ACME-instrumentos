@@ -5,15 +5,34 @@
   <head>
     <meta charset="UTF-8" />
     <title>Sistema ACME</title>
-    <link rel="stylesheet" href="{% static 'styles.css' %}" />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB"
+      crossorigin="anonymous"
+    />
   </head>
   <body>
-    <div class="container">
-      <h1 class="title">Sistema de Inventario y Facturación ACME</h1>
+    <div>
+      <a href="{% url 'home' %}">
+        <h1 class="title">Sistema de Inventario y Facturación ACME</h1>
+      </a>
 
-      <hr />
-
-      {% block content %} {% endblock %}
+      {% if user.is_authenticated %}
+      <form method="post" action="{% url 'logout' %}">
+        {% csrf_token %}
+        <button type="submit">Cerrar Sesión</button>
+      </form>
+      {% endif %}
     </div>
+
+    <hr />
+
+    {% block content %} {% endblock %}
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
+      crossorigin="anonymous"
+    ></script>
   </body>
 </html>

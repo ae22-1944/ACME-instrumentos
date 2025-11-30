@@ -1,16 +1,24 @@
 from django.urls import path
 from .views import (
     crear_factura,
+    descargar_factura,
     factura_detalle,
     reporte_facturas,
     reporte_ventas,
-    menu_facturacion,
+    solicitar_fechas_ventas,
 )
 
 urlpatterns = [
-    path("", menu_facturacion, name="menu_facturacion"),
     path("nuevo/", crear_factura, name="crear_factura"),
-    path("reporte/", reporte_facturas, name="reporte_facturas"),
-    path("ventas/", reporte_ventas, name="reporte_ventas"),
-    path("<str:numero_factura>/", factura_detalle, name="factura_salida"),
+    path("ventas/", reporte_facturas, name="ventas"),
+    path("<str:numero_factura>/", factura_detalle, name="factura_detalle"),
+    path(
+        "<str:numero_factura>/descargar/", descargar_factura, name="descargar_factura"
+    ),
+    path("reporte/ventas/", reporte_ventas, name="reporte_ventas"),
+    path(
+        "reporte/ventas/solicitar/",
+        solicitar_fechas_ventas,
+        name="solicitar_fechas_ventas",
+    ),
 ]

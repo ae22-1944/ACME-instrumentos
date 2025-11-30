@@ -3,10 +3,8 @@
 <h2>Facturación</h2>
 
 <ul>
-  <li><a href="/facturacion/nuevo/">Crear factura</a></li>
-  <li><a href="/facturacion/reporte/">Reporte de facturas</a></li>
-  <li><a href="/facturacion/ventas/">Reporte de ventas</a></li>
-  <li><a href="/">Volver al inicio</a></li>
+  <li><a href="{% url 'crear_factura' %}">Crear factura</a></li>
+  <li><a href="{% url 'ventas' %}">Ventas</a></li>
 </ul>
 
 {% endblock %}

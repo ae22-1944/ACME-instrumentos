@@ -5,8 +5,34 @@
 <ul>
   <li><a href="/inventario/producto/nuevo/">Registrar producto</a></li>
   <li><a href="/inventario/categoria/nueva/">Registrar categoría</a></li>
-  <li><a href="/inventario/reporte/">Reporte de inventario</a></li>
-  <li><a href="/">Volver al inicio</a></li>
+  <li><a href="/inventario/reporte/">Reporte inventario</a></li>
 </ul>
+
+<h2>Reporte de Inventario</h2>
+
+<table border="1" width="100%">
+  <thead>
+    <tr>
+      <th>Producto</th>
+      <th>Proveedor</th>
+      <th>Categoría</th>
+      <th>Precio</th>
+      <th>Stock actual</th>
+      <th>Stock mínimo</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for p in productos %}
+    <tr>
+      <td><a href="{% url 'producto_detalle' p.codigo %}">{{ p.nombre }}</a></td>
+      <td>{{ p.proveedor.nombre }}</td>
+      <td>{{ p.categoria.descripcion }}</td>
+      <td>{{ p.precio_unitario }}</td>
+      <td>{{ p.stock_actual }}</td>
+      <td>{{ p.stock_minimo }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
 
 {% endblock %}

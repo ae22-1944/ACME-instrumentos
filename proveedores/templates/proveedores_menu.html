@@ -3,9 +3,45 @@
 <h2>Proveedores</h2>
 
 <ul>
-  <li><a href="/proveedores/nuevo/">Registrar proveedor</a></li>
-  <li><a href="/proveedores/reporte/">Reporte de proveedores</a></li>
-  <li><a href="/">Volver al inicio</a></li>
+  <li><a href="{% url 'crear_proveedor' %}">Registrar proveedor</a></li>
+  <li><a href="{% url 'reporte_proveedores' %}">Reporte proveedores</a></li>
 </ul>
+
+<h2>Reporte de Proveedores</h2>
+
+<table border="1" width="100%">
+  <thead>
+    <tr>
+      <th>Nombre</th>
+      <th>Contacto</th>
+      <th>Teléfono</th>
+      <th>Correo</th>
+      <th>Estado</th>
+      <th>Acciones</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for p in proveedores %}
+    <tr>
+      <td><a href="{% url 'proveedor_detalle' p.pk %}">{{ p.nombre }}</a></td>
+      <td>{{ p.contacto }}</td>
+      <td>{{ p.telefono }}</td>
+      <td>{{ p.correo }}</td>
+      <td>{{ p.estado }}</td>
+      <td>
+        <form action="{% url 'borrar_proveedor' p.pk %}" method="POST">
+          {% csrf_token %}
+          <button
+            type="submit"
+            onclick="return confirm('¿Seguro que deseas borrar este proveedor?');"
+          >
+            Borrar
+          </button>
+        </form>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
 
 {% endblock %}

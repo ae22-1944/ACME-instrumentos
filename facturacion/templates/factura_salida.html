@@ -2,10 +2,21 @@
 
 <h2>Factura {{ factura.numero_factura }}</h2>
 
+<button>
+  <a href="{% url 'descargar_factura' factura.numero_factura %}">Descargar factura</a>
+</button>
+
 <p>Fecha: {{ factura.fecha }}</p>
-<p>Cliente: {{ factura.cliente.nombre }}</p>
+{% if factura.cliente %}
+<p>
+  Cliente:
+  <a href="{% url 'cliente_detalle' factura.cliente.pk %}">{{ factura.cliente.nombre }}</a>
+</p>
 <p>Dirección: {{ factura.cliente.direccion }}</p>
 <p>Teléfono: {{ factura.cliente.telefono }}</p>
+{% else %}
+<p>Cliente: {{ factura.nombre_cliente }}</p>
+{% endif %}
 <p>Método de pago: {{ factura.metodo_pago }}</p>
 
 <hr />
