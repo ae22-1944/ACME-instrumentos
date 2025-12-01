@@ -1,21 +1,562 @@
-{% extends "base.html" %}{% load auth_extras %} {% block content %}
+{% extends "base.html" %}{% load auth_extras %}
 
-<ul>
+{% block content %}
+
+<!-- Welcome Header -->
+<div class="welcome-banner mb-5 fade-in">
+  <div class="banner-content">
+    <div class="banner-left">
+      <div class="welcome-greeting">
+        <h1 class="welcome-title">¡Bienvenido!</h1>
+        <p class="welcome-subtitle text-dark">{{ user.get_full_name|default:user.username }}</p>
+      </div>
+      <div class="banner-date">
+        <i class="fas fa-calendar-alt me-2"></i>
+        <span id="currentDate"></span>
+      </div>
+    </div>
+    <div class="banner-right">
+      <div class="role-badge">
+        <div class="role-icon">
+          {% if user.is_superuser or user|has_group:"Administrador" %}
+            <i class="fas fa-crown"></i>
+          {% elif user|has_group:"Comprador" %}
+            <i class="fas fa-shopping-bag"></i>
+          {% elif user|has_group:"Facturador" %}
+            <i class="fas fa-receipt"></i>
+          {% else %}
+            <i class="fas fa-user"></i>
+          {% endif %}
+        </div>
+        <div class="role-text">
+          <span class="role-label">Rol</span>
+          <span class="role-name">
+            {% if user.is_superuser or user|has_group:"Administrador" %}
+              Administrador
+            {% elif user|has_group:"Comprador" %}
+              Comprador
+            {% elif user|has_group:"Facturador" %}
+              Facturador
+            {% else %}
+              Usuario
+            {% endif %}
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Quick Stats - Solo Administrador -->
+{% if estadisticas.es_admin %}
+<div class="row g-3 mb-5" id="quickStats">
+  <div class="col-md-3 col-sm-6">
+    <div class="stat-card">
+      <div class="stat-icon inventory">
+        <i class="fas fa-boxes"></i>
+      </div>
+      <div class="stat-content">
+        <h6>Productos</h6>
+        <p class="stat-number">{{ estadisticas.productos }}</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3 col-sm-6">
+    <div class="stat-card">
+      <div class="stat-icon clients">
+        <i class="fas fa-users"></i>
+      </div>
+      <div class="stat-content">
+        <h6>Clientes</h6>
+        <p class="stat-number">{{ estadisticas.clientes }}</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3 col-sm-6">
+    <div class="stat-card">
+      <div class="stat-icon suppliers">
+        <i class="fas fa-truck"></i>
+      </div>
+      <div class="stat-content">
+        <h6>Proveedores</h6>
+        <p class="stat-number">{{ estadisticas.proveedores }}</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3 col-sm-6">
+    <div class="stat-card">
+      <div class="stat-icon sales">
+        <i class="fas fa-chart-line"></i>
+      </div>
+      <div class="stat-content">
+        <h6>Ventas Hoy</h6>
+        <p class="stat-number">RD$ {{ estadisticas.ventas_hoy|floatformat:2 }}</p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<!-- Main Menu Section -->
+<div class="menu-section mb-5">
+  <h2 class="section-title mb-4">
+    <i class="fas fa-th-large me-2"></i>Accesos Rápidos
+  </h2>
+
+  <!-- Administrador Menu -->
   {% if user.is_superuser or user|has_group:"Administrador" %}
-  <li><a href="{% url 'admin:index' %}">Administración</a></li>
-  <li><a href="{% url 'ventas' %}">Ventas</a></li>
-  <li><a href="{% url 'clientes' %}">Clientes</a></li>
-  <li><a href="{% url 'proveedores' %}">Proveedores</a></li>
-  <li><a href="{% url 'inventario' %}">Inventario</a></li>
-  <li><a href="{% url 'crear_factura' %}">Facturación</a></li>
-  {% else %} {% if user|has_group:"Comprador" %}
-  <li><a href="{% url 'inventario' %}">Inventario</a></li>
-  <li><a href="{% url 'proveedores' %}">Proveedores</a></li>
-  {% endif %} {% if user|has_group:"Facturador" %}
-  <li><a href="{% url 'crear_factura' %}">Facturación</a></li>
-  <li><a href="{% url 'clientes' %}">Clientes</a></li>
-  <li><a href="{% url 'ventas' %}">Ventas</a></li>
-  {% endif %} {% endif %}
-</ul>
+  <div class="row g-3">
+    <div class="col-md-6 col-lg-4 slide-in-up" style="animation-delay: 0.1s;">
+      <a href="{% url 'admin:index' %}" class="menu-card admin-card text-decoration-none">
+        <div class="card-icon">
+          <i class="fas fa-cogs"></i>
+        </div>
+        <h5>Administración</h5>
+        <p class="card-description">Panel de administración del sistema</p>
+        <span class="card-arrow"><i class="fas fa-arrow-right"></i></span>
+      </a>
+    </div>
+
+    <div class="col-md-6 col-lg-4">
+      <a href="{% url 'ventas' %}" class="menu-card sales-card text-decoration-none">
+        <div class="card-icon">
+          <i class="fas fa-shopping-cart"></i>
+        </div>
+        <h5>Ventas</h5>
+        <p class="card-description">Gestión de ventas y órdenes</p>
+        <span class="card-arrow"><i class="fas fa-arrow-right"></i></span>
+      </a>
+    </div>
+
+    <div class="col-md-6 col-lg-4">
+      <a href="{% url 'clientes' %}" class="menu-card client-card text-decoration-none">
+        <div class="card-icon">
+          <i class="fas fa-users"></i>
+        </div>
+        <h5>Clientes</h5>
+        <p class="card-description">Administre clientes y contactos</p>
+        <span class="card-arrow"><i class="fas fa-arrow-right"></i></span>
+      </a>
+    </div>
+
+    <div class="col-md-6 col-lg-4">
+      <a href="{% url 'proveedores' %}" class="menu-card supplier-card text-decoration-none">
+        <div class="card-icon">
+          <i class="fas fa-truck"></i>
+        </div>
+        <h5>Proveedores</h5>
+        <p class="card-description">Gestión de proveedores</p>
+        <span class="card-arrow"><i class="fas fa-arrow-right"></i></span>
+      </a>
+    </div>
+
+    <div class="col-md-6 col-lg-4">
+      <a href="{% url 'inventario' %}" class="menu-card inventory-card text-decoration-none">
+        <div class="card-icon">
+          <i class="fas fa-boxes"></i>
+        </div>
+        <h5>Inventario</h5>
+        <p class="card-description">Control de productos y stock</p>
+        <span class="card-arrow"><i class="fas fa-arrow-right"></i></span>
+      </a>
+    </div>
+
+    <div class="col-md-6 col-lg-4">
+      <a href="{% url 'facturacion' %}" class="menu-card invoice-card text-decoration-none">
+        <div class="card-icon">
+          <i class="fas fa-receipt"></i>
+        </div>
+        <h5>Facturación</h5>
+        <p class="card-description">Crear y gestionar facturas</p>
+        <span class="card-arrow"><i class="fas fa-arrow-right"></i></span>
+      </a>
+    </div>
+  </div>
+
+  <!-- Comprador Menu -->
+  {% else %}
+    {% if user|has_group:"Comprador" %}
+    <div class="row g-3">
+      <div class="col-md-6 col-lg-4">
+        <a href="{% url 'inventario' %}" class="menu-card inventory-card text-decoration-none">
+          <div class="card-icon">
+            <i class="fas fa-boxes"></i>
+          </div>
+          <h5>Inventario</h5>
+          <p class="card-description">Control de productos y stock</p>
+          <span class="card-arrow"><i class="fas fa-arrow-right"></i></span>
+        </a>
+      </div>
+
+      <div class="col-md-6 col-lg-4">
+        <a href="{% url 'proveedores' %}" class="menu-card supplier-card text-decoration-none">
+          <div class="card-icon">
+            <i class="fas fa-truck"></i>
+          </div>
+          <h5>Proveedores</h5>
+          <p class="card-description">Gestión de proveedores</p>
+          <span class="card-arrow"><i class="fas fa-arrow-right"></i></span>
+        </a>
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- Facturador Menu -->
+    {% if user|has_group:"Facturador" %}
+    <div class="row g-3">
+      <div class="col-md-6 col-lg-4">
+        <a href="{% url 'facturacion' %}" class="menu-card invoice-card text-decoration-none">
+          <div class="card-icon">
+            <i class="fas fa-receipt"></i>
+          </div>
+          <h5>Facturación</h5>
+          <p class="card-description">Crear y gestionar facturas</p>
+          <span class="card-arrow"><i class="fas fa-arrow-right"></i></span>
+        </a>
+      </div>
+
+      <div class="col-md-6 col-lg-4">
+        <a href="{% url 'clientes' %}" class="menu-card client-card text-decoration-none">
+          <div class="card-icon">
+            <i class="fas fa-users"></i>
+          </div>
+          <h5>Clientes</h5>
+          <p class="card-description">Administre clientes y contactos</p>
+          <span class="card-arrow"><i class="fas fa-arrow-right"></i></span>
+        </a>
+      </div>
+
+      <div class="col-md-6 col-lg-4">
+        <a href="{% url 'ventas' %}" class="menu-card sales-card text-decoration-none">
+          <div class="card-icon">
+            <i class="fas fa-shopping-cart"></i>
+          </div>
+          <h5>Ventas</h5>
+          <p class="card-description">Gestión de ventas y órdenes</p>
+          <span class="card-arrow"><i class="fas fa-arrow-right"></i></span>
+        </a>
+      </div>
+    </div>
+    {% endif %}
+  {% endif %}
+</div>
+
+<style>
+  /* Welcome Banner */
+  .welcome-banner {
+    background: linear-gradient(135deg, rgba(13, 110, 253, 0.1) 0%, rgba(13, 202, 240, 0.1) 100%);
+    padding: 2.5rem;
+    border-radius: 15px;
+    border-left: 5px solid #0d6efd;
+    animation: slideDown 0.5s ease-out;
+  }
+
+  .welcome-banner h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #333;
+    margin: 0;
+  }
+
+  .user-badge {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding: 1.5rem;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+  }
+
+  .user-role {
+    font-weight: 600;
+    color: #0d6efd;
+    font-size: 1.1rem;
+  }
+
+  /* Quick Stats */
+  .stat-card {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    animation: slideUp 0.6s ease-out forwards;
+    opacity: 0;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+    transition: left 0.6s ease;
+  }
+
+  .stat-card:hover::before {
+    left: 100%;
+  }
+
+  .stat-card:nth-child(1) { animation-delay: 0.1s; }
+  .stat-card:nth-child(2) { animation-delay: 0.2s; }
+  .stat-card:nth-child(3) { animation-delay: 0.3s; }
+  .stat-card:nth-child(4) { animation-delay: 0.4s; }
+
+  @keyframes slideUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes slideDown {
+    from {
+      opacity: 0;
+      transform: translateY(-20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .stat-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+  }
+
+  .stat-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem;
+    color: white;
+  }
+
+  .stat-icon.inventory {
+    background: linear-gradient(135deg, #6f42c1 0%, #5d35b0 100%);
+  }
+
+  .stat-icon.clients {
+    background: linear-gradient(135deg, #0dcaf0 0%, #0bb5dd 100%);
+  }
+
+  .stat-icon.suppliers {
+    background: linear-gradient(135deg, #fd7e14 0%, #e86b05 100%);
+  }
+
+  .stat-icon.sales {
+    background: linear-gradient(135deg, #28a745 0%, #1e8449 100%);
+  }
+
+  .stat-content h6 {
+    margin: 0;
+    color: #666;
+    font-size: 0.9rem;
+    font-weight: 500;
+  }
+
+  .stat-number {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #333;
+  }
+
+  /* Menu Section */
+  .menu-section {
+    animation: fadeIn 0.6s ease-out;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  .section-title {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #333;
+    position: relative;
+    padding-left: 0;
+  }
+
+  .section-title i {
+    color: #0d6efd;
+  }
+
+  /* Enhanced Menu Cards */
+  .menu-card {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .card-arrow {
+    position: absolute;
+    right: 20px;
+    bottom: 20px;
+    font-size: 1.5rem;
+    opacity: 0;
+    transform: translateX(10px);
+    transition: all 0.3s ease;
+  }
+
+  .menu-card:hover .card-arrow {
+    opacity: 1;
+    transform: translateX(0);
+  }
+
+  /* Home Footer */
+  .home-footer {
+    padding-bottom: 2rem;
+  }
+
+  .home-footer p {
+    margin: 0.5rem 0;
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .welcome-banner {
+      padding: 1.5rem;
+    }
+
+    .welcome-banner h1 {
+      font-size: 1.8rem;
+    }
+
+    .user-badge {
+      margin-top: 1.5rem;
+      justify-content: center;
+    }
+
+    .section-title {
+      font-size: 1.4rem;
+    }
+
+    .stat-card {
+      flex-direction: column;
+      text-align: center;
+    }
+
+    .stat-icon {
+      width: 50px;
+      height: 50px;
+      font-size: 1.5rem;
+    }
+  }
+</style>
+
+<script>
+  // Update current date
+  function updateDate() {
+    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+    const today = new Date().toLocaleDateString('es-ES', options);
+    const capitalized = today.charAt(0).toUpperCase() + today.slice(1);
+    document.getElementById('currentDate').textContent = capitalized;
+  }
+
+  // Call on page load
+  updateDate();
+
+  // Update every minute
+  setInterval(updateDate, 60000);
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+{% if estadisticas.es_admin %}
+<script>
+  // Chart.js for Sales Trend
+  document.addEventListener('DOMContentLoaded', function() {
+    const ctx = document.getElementById('ventasChart');
+    if (ctx) {
+      new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: ['Semana 1', 'Semana 2', 'Semana 3', 'Semana 4', 'Semana 5'],
+        datasets: [{
+          label: 'Ventas (RD$)',
+          data: [12000, 19000, 15000, 25000, 22000],
+          borderColor: '#0d6efd',
+          backgroundColor: 'rgba(13, 110, 253, 0.1)',
+          borderWidth: 3,
+          fill: true,
+          tension: 0.4,
+          pointRadius: 6,
+          pointHoverRadius: 8,
+          pointBackgroundColor: '#0d6efd',
+          pointBorderColor: '#fff',
+          pointBorderWidth: 2,
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        plugins: {
+          legend: {
+            display: true,
+            labels: {
+              font: {
+                family: "'Inter', sans-serif",
+                size: 12,
+                weight: '600'
+              },
+              padding: 15,
+              usePointStyle: true
+            }
+          }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            ticks: {
+              font: {
+                family: "'Inter', sans-serif"
+              },
+              callback: function(value) {
+                return 'RD$ ' + value.toLocaleString();
+              }
+            },
+            grid: {
+              color: 'rgba(0, 0, 0, 0.05)'
+            }
+          },
+          x: {
+            ticks: {
+              font: {
+                family: "'Inter', sans-serif"
+              }
+            },
+            grid: {
+              display: false
+            }
+          }
+        }
+      }
+      });
+    }
+  });
+</script>
+{% endif %}
 
 {% endblock %}

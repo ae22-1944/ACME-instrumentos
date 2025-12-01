@@ -14,7 +14,7 @@ class CategoriaProducto(models.Model):
 class Producto(models.Model):
     id_producto = models.AutoField(primary_key=True)
     codigo = models.CharField(max_length=10, unique=True, blank=True, editable=False)
-    nombre = models.CharField(max_length=50)
+    nombre = models.CharField(max_length=50, unique=True)
     imagen = models.ImageField(upload_to="productos/", null=True, blank=True)
     categoria = models.ForeignKey(CategoriaProducto, on_delete=models.CASCADE)
     proveedor = models.ForeignKey(

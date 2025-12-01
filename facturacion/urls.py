@@ -1,5 +1,6 @@
 from django.urls import path
 from .views import (
+    facturacion_menu,
     crear_factura,
     descargar_factura,
     factura_detalle,
@@ -9,6 +10,7 @@ from .views import (
 )
 
 urlpatterns = [
+    path("", facturacion_menu, name="facturacion"),
     path("nuevo/", crear_factura, name="crear_factura"),
     path("ventas/", reporte_facturas, name="ventas"),
     path("<str:numero_factura>/", factura_detalle, name="factura_detalle"),

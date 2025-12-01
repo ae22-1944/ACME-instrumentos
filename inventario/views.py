@@ -24,6 +24,13 @@ def crear_editar_producto(request, codigo=None):
     )
 
 
+
+def borrar_producto(request, pk):
+    producto = get_object_or_404(Producto, pk=pk)
+    producto.delete()
+    return redirect("inventario")
+
+
 def crear_categoria(request):
     categorias = CategoriaProducto.objects.order_by("descripcion")
 

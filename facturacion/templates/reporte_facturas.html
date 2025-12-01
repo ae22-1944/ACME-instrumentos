@@ -1,29 +1,119 @@
-{% extends "base.html" %} {% block content %}
-<ul>
-  <li><a href="{% url 'solicitar_fechas_ventas' %}">Reporte de Ventas por Fecha</a></li>
-</ul>
+{% extends "base.html" %}{% block content %}
 
-<h2>Ventas</h2>
+<!-- Page Header -->
+<div class="page-header mb-4">
+  <div class="row align-items-center">
+    <div class="col">
+      <h1 class="mb-0">
+        <i class="fas fa-chart-bar me-2"></i>Reporte de Ventas
+      </h1>
+    </div>
+    <div class="col-auto">
+      <a href="{% url 'solicitar_fechas_ventas' %}" class="btn btn-primary">
+        <i class="fas fa-file-pdf me-2"></i>Generar Reporte PDF
+      </a>
+    </div>
+  </div>
+</div>
 
-<table border="1" width="100%">
-  <thead>
-    <tr>
-      <th>Número</th>
-      <th>Fecha</th>
-      <th>Cliente</th>
-      <th>Total</th>
-    </tr>
-  </thead>
-  <tbody>
-    {% for f in facturas %}
-    <tr>
-      <td><a href="{% url 'factura_detalle' f.numero_factura %}">{{ f.numero_factura }}</a></td>
-      <td>{{ f.fecha }}</td>
-      <td>{{ f.nombre_cliente }}</td>
-      <td>{{ f.total }}</td>
-    </tr>
-    {% endfor %}
-  </tbody>
-</table>
+<!-- Quick Stats -->
+<div class="row mb-5 g-3">
+  <div class="col-md-4 col-sm-6">
+    <div class="stat-card">
+      <div class="stat-icon sales">
+        <i class="fas fa-receipt"></i>
+      </div>
+      <div class="stat-content">
+        <h6>Total Facturas</h6>
+        <p class="stat-number">{{ facturas|length }}</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4 col-sm-6">
+    <div class="stat-card">
+      <div class="stat-icon sales">
+        <i class="fas fa-money-bill-wave"></i>
+      </div>
+      <div class="stat-content">
+        <h6>Total Vendido</h6>
+        <p class="stat-number">RD$ {{ total|floatformat:2 }}</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4 col-sm-6">
+    <div class="stat-card">
+      <div class="stat-icon sales">
+        <i class="fas fa-calendar"></i>
+      </div>
+      <div class="stat-content">
+        <h6>Período</h6>
+        <p class="stat-number">Todo el tiempo</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Sales Table -->
+<div class="card">
+  <div class="card-header">
+    <h5 class="mb-0">
+      <i class="fas fa-list me-2"></i>Listado de Ventas
+    </h5>
+  </div>
+  <div class="card-body p-0">
+    {% if facturas %}
+      <div class="table-responsive">
+        <table class="table table-hover mb-0">
+          <thead>
+            <tr>
+              <th class="text-center">Número</th>
+              <th>Fecha</th>
+              <th>Cliente</th>
+              <th class="text-end">Subtotal</th>
+              <th class="text-end">ITBIS</th>
+              <th class="text-end">Total</th>
+              <th class="text-center">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for f in facturas %}
+            <tr>
+              <td class="text-center">
+                <span class="badge bg-primary">{{ f.numero_factura }}</span>
+              </td>
+              <td>
+                <i class="fas fa-calendar-alt me-2 text-muted"></i>
+                {{ f.fecha|date:"d/m/Y" }}
+              </td>
+              <td>
+                <strong>{{ f.nombre_cliente|truncatewords:3 }}</strong>
+              </td>
+              <td class="text-end">RD$ {{ f.subtotal|floatformat:2 }}</td>
+              <td class="text-end">RD$ {{ f.itbis|floatformat:2 }}</td>
+              <td class="text-end">
+                <strong class="text-success">RD$ {{ f.total|floatformat:2 }}</strong>
+              </td>
+              <td class="text-center">
+                <a href="{% url 'factura_detalle' f.numero_factura %}" class="btn btn-sm btn-outline-primary" title="Ver detalles">
+                  <i class="fas fa-eye"></i>
+                </a>
+                <a href="{% url 'descargar_factura' f.numero_factura %}" class="btn btn-sm btn-outline-success" title="Descargar PDF">
+                  <i class="fas fa-download"></i>
+                </a>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div class="alert alert-info m-0 mb-0 text-center py-5">
+        <i class="fas fa-info-circle fa-2x mb-3"></i>
+        <p class="mb-0"><strong>No hay ventas registradas</strong></p>
+        <small class="text-muted">Crea una nueva factura para comenzar</small>
+      </div>
+    {% endif %}
+  </div>
+</div>
 
 {% endblock %}

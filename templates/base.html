@@ -4,6 +4,7 @@
 <html lang="es">
   <head>
     <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Sistema ACME</title>
     <link
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
@@ -11,24 +12,48 @@
       integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB"
       crossorigin="anonymous"
     />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="{% static 'styles.css' %}" />
   </head>
   <body>
-    <div>
-      <a href="{% url 'home' %}">
-        <h1 class="title">Sistema de Inventario y Facturación ACME</h1>
-      </a>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg text-dark shadow-sm">
+      <div class="container-fluid px-4">
+        <a class="navbar-brand fw-bold d-flex align-items-center" href="{% url 'home' %}">
+          <img src="{% static 'logo.webp' %}" alt="ACME logo" width="80" />
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <div class="ms-auto">
+            {% if user.is_authenticated %}
+            <span class="me-3"><i class="fas fa-user-circle"></i> {{ user.username }}</span>
+            <form method="post" action="{% url 'logout' %}" class="d-inline">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-outline-light btn-sm text-dark">
+                <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+              </button>
+            </form>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </nav>
 
-      {% if user.is_authenticated %}
-      <form method="post" action="{% url 'logout' %}">
-        {% csrf_token %}
-        <button type="submit">Cerrar Sesión</button>
-      </form>
-      {% endif %}
-    </div>
+    <!-- Main Content -->
+    <main class="py-4">
+      <div class="container-fluid">
+        {% block content %} {% endblock %}
+      </div>
+    </main>
 
-    <hr />
+    <!-- Footer -->
+    <footer class="bg-dark text-white text-center py-3 mt-5">
+      <p class="mb-0">&copy; 2025 ACME Instrumentos</p>
+    </footer>
 
-    {% block content %} {% endblock %}
     <script
       src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
       integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"

@@ -19,9 +19,17 @@ class Factura(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.numero_factura:
-            last = Factura.objects.order_by("-id_factura").first()
-            next_num = 1 if not last else last.id_factura + 1
+            last = Factura.objects.order_by("-numero_factura").first()
+
+            if last and last.numero_factura.startswith("F-"):
+                # extraemos el número y sumamos 1
+                last_num = int(last.numero_factura.split("-")[1])
+                next_num = last_num + 1
+            else:
+                next_num = 1
+
             self.numero_factura = f"F-{next_num:06d}"
+
         super().save(*args, **kwargs)
 
     def __str__(self):

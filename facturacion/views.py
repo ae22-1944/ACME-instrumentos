@@ -5,6 +5,7 @@ from django.db import transaction
 from django.contrib import messages
 from django.http import FileResponse
 from django.db.models import Sum
+from django.urls import reverse
 from .utils import generar_pdf_factura
 from datetime import datetime, date
 
@@ -15,6 +16,11 @@ from clientes.models import Cliente
 from reportes.ventas_pdf import generar_pdf_ventas
 
 ITBIS_RATE = Decimal("0.18")
+
+
+def facturacion_menu(request):
+    """Vista del menú de facturación"""
+    return render(request, "facturacion_menu.html")
 
 
 def crear_factura(request):
@@ -126,7 +132,10 @@ def crear_factura(request):
             )
 
             filename = f"{factura.numero_factura}.pdf"
-            return FileResponse(pdf_buffer, as_attachment=True, filename=filename)
+
+            response = FileResponse(pdf_buffer, as_attachment=True, filename=filename)
+            response["Refresh"] = "0; url=" + reverse("crear_factura")
+            return response
 
     # GET (mostrar formulario vacío)
     factura_form = FacturaForm(clientes_qs=clientes_qs)
@@ -157,7 +166,10 @@ def factura_detalle(request, numero_factura):
 
 def reporte_facturas(request):
     facturas = Factura.objects.order_by("-fecha")
-    return render(request, "reporte_facturas.html", {"facturas": facturas})
+    total_ventas = facturas.aggregate(Sum("total"))["total__sum"] or Decimal("0.00")
+    return render(
+        request, "reporte_facturas.html", {"facturas": facturas, "total": total_ventas}
+    )
 
 
 def descargar_factura(request, numero_factura):

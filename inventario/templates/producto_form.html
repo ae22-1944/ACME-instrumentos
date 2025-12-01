@@ -1,8 +1,135 @@
 {% extends "base.html" %} {% block content %}
-<h2>Registrar Producto</h2>
 
-<form method="POST" enctype="multipart/form-data">
-  {% csrf_token %} {{ form.as_p }}
-  <button type="submit">Guardar Producto</button>
-</form>
+<div class="page-header mb-4">
+  <div class="d-flex align-items-center">
+    <i class="fas fa-box-open fa-2x text-primary me-3"></i>
+    <div>
+      <h1 class="mb-0">Registrar Nuevo Producto</h1>
+      <p class="text-muted mb-0">Agregue un producto al inventario del sistema</p>
+    </div>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-md-8">
+    <div class="card shadow-sm">
+      <div class="card-header bg-gradient-primary text-white">
+        <h5 class="mb-0"><i class="fas fa-form me-2"></i>Información del Producto</h5>
+      </div>
+      <div class="card-body">
+        <form method="POST" enctype="multipart/form-data">
+          {% csrf_token %}
+
+          <div class="mb-3">
+            <label class="form-label">Nombre *</label>
+            {{ form.nombre }}
+          </div>
+
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Categoría *</label>
+              {{ form.categoria }}
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Proveedor</label>
+              {{ form.proveedor }}
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-4 mb-3">
+              <label class="form-label">Precio Unitario *</label>
+              {{ form.precio_unitario }}
+            </div>
+            <div class="col-md-4 mb-3">
+              <label class="form-label">Stock Actual *</label>
+              {{ form.stock_actual }}
+            </div>
+            <div class="col-md-4 mb-3">
+              <label class="form-label">Stock Mínimo *</label>
+              {{ form.stock_minimo }}
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Imagen del Producto</label>
+            {{ form.imagen }} {% if form.instance.imagen %}
+            <div class="mt-2">
+              <p class="text-muted mb-2">Imagen actual:</p>
+              <img
+                src="{{ form.instance.imagen.url }}"
+                alt="{{ form.instance.nombre }}"
+                class="product-image-preview"
+              />
+            </div>
+            {% endif %}
+          </div>
+
+          {% if form.errors %}
+          <div class="alert alert-danger">
+            <ul class="mb-0">
+              {% for field, errors in form.errors.items %} {% for error in errors %}
+              <li>{{ error }}</li>
+              {% endfor %} {% endfor %}
+            </ul>
+          </div>
+          {% endif %}
+
+          <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-primary">
+              <i class="fas fa-save me-1"></i>Guardar
+            </button>
+
+            <a href="{% url 'inventario' %}" class="btn btn-secondary">
+              <i class="fas fa-times me-1"></i>Cancelar
+            </a>
+
+            {% if form.instance.pk %}
+            
+            <a
+              href="{% url 'borrar_producto' form.instance.pk %}"
+              class="btn btn-danger ms-auto"
+              onclick="return confirm('¿Seguro que deseas borrar este producto?');"
+            >
+              <form action="{% url 'borrar_producto' form.instance.pk %}" method="POST" style="display: inline;">
+              {% csrf_token %}
+                <i class="fas fa-trash me-1"></i>Eliminar
+            </form>
+            </a>
+            {% endif %}
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-4">
+    <div class="card shadow-sm bg-light mb-3">
+      <div class="card-body">
+        <h5 class="card-title mb-3">
+          <i class="fas fa-lightbulb text-warning me-2"></i>Recomendaciones
+        </h5>
+        <ul class="list-unstyled">
+          <li class="mb-2">
+            <i class="fas fa-check-circle text-success me-2"></i>
+            <small>Ingrese códigos únicos para cada producto</small>
+          </li>
+          <li class="mb-2">
+            <i class="fas fa-image text-info me-2"></i>
+            <small>Agregue una imagen clara del producto</small>
+          </li>
+          <li class="mb-2">
+            <i class="fas fa-dollar-sign text-primary me-2"></i>
+            <small>Defina precios competitivos</small>
+          </li>
+          <li>
+            <i class="fas fa-warehouse text-primary me-2"></i>
+            <small>Configure stock mínimo para alertas</small>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
 {% endblock %}

@@ -1,79 +1,176 @@
 {% extends "base.html" %} {% block content %}
-<h2>Facturación</h2>
 
-<form method="POST" id="factura-main-form">
+<div class="page-header mb-4">
+  <div class="d-flex align-items-center">
+    <i class="fas fa-file-invoice fa-2x text-primary me-3"></i>
+    <div>
+      <h1 class="mb-0">Crear Nueva Factura</h1>
+      <p class="text-muted mb-0">Registre una venta y genere la factura</p>
+    </div>
+  </div>
+</div>
+
+<form method="POST" id="factura-main-form" novalidate>
   {% csrf_token %}
 
-  <h3>Información Cliente</h3>
+  <div class="row mb-4">
+    <!-- Información del Cliente -->
+    <div class="col-md-6">
+      <div class="card shadow-sm">
+        <div class="card-header bg-gradient-primary text-white">
+          <h5 class="mb-0"><i class="fas fa-user me-2"></i>Información del Cliente</h5>
+        </div>
+        <div class="card-body">
+          <div class="mb-3">
+            <label for="id_cliente" class="form-label fw-bold">
+              Cliente <span class="text-danger">*</span>
+            </label>
+            {{ factura_form.cliente }}
+          </div>
 
-  <div>
-    <label>Cliente</label>
-    {{ factura_form.cliente }}
+          <div id="info-cliente" class="alert alert-info" style="display: none;">
+            <!-- Se llenará dinámicamente por JS al cambiar cliente -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Método de Pago -->
+    <div class="col-md-6">
+      <div class="card shadow-sm">
+        <div class="card-header bg-gradient-primary text-white">
+          <h5 class="mb-0"><i class="fas fa-credit-card me-2"></i>Método de Pago</h5>
+        </div>
+        <div class="card-body">
+          <div class="mb-3">
+            <label for="id_metodo_pago" class="form-label fw-bold">
+              Método <span class="text-danger">*</span>
+            </label>
+            {{ factura_form.metodo_pago }}
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 
-  <div id="info-cliente" style="margin: 8px 0; font-size: 0.95rem; color: #555">
-    <!-- Se llenará dinámicamente por JS al cambiar cliente -->
+  <!-- Añadir Productos -->
+  <div class="card shadow-sm mb-4">
+    <div class="card-header bg-gradient-primary text-white">
+      <h5 class="mb-0"><i class="fas fa-boxes me-2"></i>Añadir Productos</h5>
+    </div>
+    <div class="card-body">
+      <div class="row g-3 align-items-end mb-4">
+        <div class="col-md-5">
+          <label for="producto-select" class="form-label fw-bold">Producto</label>
+          <select name="producto" id="producto-select" class="form-select">
+            <option value="0">-- Seleccione un producto --</option>
+            {% for p in productos %}
+            <option
+              value="{{ p.id_producto }}"
+              data-precio="{{ p.precio_unitario }}"
+              data-stock="{{ p.stock_actual }}"
+              data-minimo="{{ p.stock_minimo }}"
+            >
+              {{ p.nombre }} (Stock: {{ p.stock_actual }})
+            </option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="col-md-4">
+          <label for="cantidad-input" class="form-label fw-bold">Cantidad</label>
+          <input type="number" id="cantidad-input" name="cantidad" min="1" value="1" class="form-control" />
+        </div>
+
+        <div class="col-md-3">
+          <button type="button" id="btn-add-item" class="btn btn-success w-100">
+            <i class="fas fa-plus me-2"></i>Añadir
+          </button>
+        </div>
+      </div>
+
+      <!-- Tabla de Productos -->
+      {% if productos %}
+      <div class="table-responsive">
+        <table id="lista-productos" class="table table-striped">
+          <thead class="table-dark">
+            <tr>
+              <th class="text-center">Acción</th>
+              <th>Producto</th>
+              <th class="text-end">Precio U.</th>
+              <th class="text-center">Cantidad</th>
+              <th class="text-end">Subtotal</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      {% else %}
+      <div class="alert alert-warning">
+        <i class="fas fa-exclamation-triangle me-2"></i>
+        No hay productos disponibles. Registre productos en el inventario primero.
+      </div>
+      {% endif %}
+
+      <input type="hidden" name="items" id="items-data" value="[]" />
+    </div>
   </div>
 
-  <div>
-    <label>Método de pago</label>
-    {{ factura_form.metodo_pago }}
+  <!-- Resumen de Totales -->
+  <div class="row">
+    <div class="col-md-8"></div>
+    <div class="col-md-4">
+      <div class="card shadow-sm border-primary">
+        <div class="card-header bg-primary text-white">
+          <h5 class="mb-0"><i class="fas fa-calculator me-2"></i>Resumen Financiero</h5>
+        </div>
+        <div class="card-body">
+          <div class="row mb-3">
+            <div class="col-6">
+              <p class="mb-1"><strong>Subtotal:</strong></p>
+            </div>
+            <div class="col-6 text-end">
+              <p class="mb-1"><span id="display-subtotal" class="badge bg-light text-dark">RD$ 0.00</span></p>
+            </div>
+          </div>
+
+          <div class="row mb-3">
+            <div class="col-6">
+              <p class="mb-1"><strong>ITBIS (<span id="itbis-rate">18</span>%):</strong></p>
+            </div>
+            <div class="col-6 text-end">
+              <p class="mb-1"><span id="display-itbis" class="badge bg-warning">RD$ 0.00</span></p>
+            </div>
+          </div>
+
+          <hr />
+
+          <div class="row">
+            <div class="col-6">
+              <h5 class="mb-0"><strong>Total:</strong></h5>
+            </div>
+            <div class="col-6 text-end">
+              <h5 class="mb-0"><span id="display-total" class="badge bg-success">RD$ 0.00</span></h5>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 
-  <hr />
-
-  <h3>Añadir Productos</h3>
-
-  <div style="display: flex; gap: 8px; align-items: center">
-    <select name="producto">
-      <option value="0">-- Seleccione --</option>
-      {% for p in productos %}
-      <option
-        value="{{ p.id_producto }}"
-        data-precio="{{ p.precio_unitario }}"
-        data-stock="{{p.stock_actual}}"
-        data-minimo="{{p.stock_minimo}}"
-      >
-        {{ p.nombre }}
-      </option>
-      {% endfor %}
-    </select>
-
-    <input type="number" name="cantidad" min="1" value="1" />
-
-    <button type="button" id="btn-add-item">Añadir</button>
-  </div>
-
-  <table id="lista-productos" style="width: 100%; margin-top: 12px">
-    <thead>
-      <tr>
-        <th>Acción</th>
-        <th>Producto</th>
-        <th>Precio</th>
-        <th>Cantidad</th>
-        <th>Subtotal</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
-
-  <input type="hidden" name="items" id="items-data" value="[]" />
-
-  <hr />
-
-  <div style="text-align: right">
-    <div>Subtotal: <span id="display-subtotal">RD$ 0.00</span></div>
-    <div>ITBIS (<span id="itbis-rate">18</span>%): <span id="display-itbis">RD$ 0.00</span></div>
-    <div>Total: <span id="display-total">RD$ 0.00</span></div>
-  </div>
-
-  <div>
-    <button type="submit">Guardar Factura</button>
+  <!-- Botones de Acción -->
+  <div class="d-flex gap-2 mt-4">
+    <button type="submit" class="btn btn-primary btn-lg">
+      <i class="fas fa-save me-2"></i>Guardar Factura
+    </button>
+    <a href="{% url 'facturacion' %}" class="btn btn-secondary btn-lg">
+      <i class="fas fa-arrow-left me-2"></i>Cancelar
+    </a>
   </div>
 </form>
 
 <script>
-  /* Lógica JS: manejar lista de items y calculos */
+  /* Lógica JS: manejar lista de items y cálculos */
   const items = [];
   const itemsInput = document.getElementById('items-data');
   const tbody = document.querySelector('#lista-productos tbody');
@@ -99,19 +196,23 @@
     items.forEach((it, idx) => {
       const tr = document.createElement('tr');
       tr.innerHTML = `
-      <td style="text-align:center;"><button type="button" data-idx="${idx}" class="btn-remove">Eliminar</button></td>
-      <td style="text-align:center;">${it.producto_name}</td>
-      <td style="text-align:right;">${formatMoney(it.precio_unitario)}</td>
-      <td style="text-align:center;">${it.cantidad}</td>
-      <td style="text-align:right;">${formatMoney(it.subtotal)}</td>
-      
-    `;
+        <td class="text-center">
+          <button type="button" data-idx="${idx}" class="btn btn-sm btn-danger btn-remove">
+            <i class="fas fa-trash me-1"></i>Eliminar
+          </button>
+        </td>
+        <td><strong>${it.producto_name}</strong></td>
+        <td class="text-end">${formatMoney(it.precio_unitario)}</td>
+        <td class="text-center"><span class="badge bg-info">${it.cantidad}</span></td>
+        <td class="text-end"><strong>${formatMoney(it.subtotal)}</strong></td>
+      `;
       tbody.appendChild(tr);
     });
 
     document.querySelectorAll('.btn-remove').forEach((b) => {
       b.onclick = (e) => {
-        const idx = Number(e.target.dataset.idx);
+        e.preventDefault();
+        const idx = Number(e.target.closest('button').dataset.idx);
         items.splice(idx, 1);
         renderItems();
         recalcTotals();
@@ -131,14 +232,16 @@
     const minimo = selected ? parseInt(selected.dataset.minimo) : 0;
 
     if (producto_id === '0' || !selected || cantidad <= 0) {
-      return alert('Seleccione producto y cantidad válida.');
+      alert('Seleccione un producto y cantidad válida.');
+      return;
     }
 
     const existing = items.find((i) => i.producto_id === producto_id);
     const totalRequested = existing ? existing.cantidad + cantidad : cantidad;
 
     if (totalRequested > stock) {
-      return alert(`No puedes agregar ${totalRequested} unidades. Solo hay ${stock} disponibles.`);
+      alert(`No puedes agregar ${totalRequested} unidades. Solo hay ${stock} disponibles.`);
+      return;
     }
 
     if (stock - totalRequested <= minimo) {
@@ -166,8 +269,8 @@
 
     renderItems();
     recalcTotals();
-
     qtyInput.value = 1;
   };
 </script>
+
 {% endblock %}

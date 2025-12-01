@@ -1,51 +1,167 @@
 {% extends "base.html" %} {% block content %}
 
-<h2>Factura {{ factura.numero_factura }}</h2>
+<div class="page-header mb-4">
+  <div class="d-flex align-items-center justify-content-between">
+    <div class="d-flex align-items-center">
+      <i class="fas fa-file-invoice-dollar fa-2x text-primary me-3"></i>
+      <div>
+        <h1 class="mb-0">Factura {{ factura.numero_factura }}</h1>
+        <p class="text-muted mb-0">Detalles de la venta realizada</p>
+      </div>
+    </div>
+    <a href="{% url 'descargar_factura' factura.numero_factura %}" class="btn btn-primary btn-lg">
+      <i class="fas fa-download me-2"></i>Descargar PDF
+    </a>
+  </div>
+</div>
 
-<button>
-  <a href="{% url 'descargar_factura' factura.numero_factura %}">Descargar factura</a>
-</button>
+<div class="row mb-4">
+  <!-- Información General -->
+  <div class="col-md-6">
+    <div class="card shadow-sm">
+      <div class="card-header bg-gradient-primary text-white">
+        <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>Información General</h5>
+      </div>
+      <div class="card-body">
+        <p class="mb-2">
+          <strong><i class="fas fa-calendar me-2 text-primary"></i>Fecha:</strong>
+          <span class="badge bg-light text-dark">{{ factura.fecha }}</span>
+        </p>
+        <p class="mb-0">
+          <strong><i class="fas fa-credit-card me-2 text-primary"></i>Método de Pago:</strong>
+          <span class="badge bg-info">{{ factura.metodo_pago }}</span>
+        </p>
+      </div>
+    </div>
+  </div>
 
-<p>Fecha: {{ factura.fecha }}</p>
-{% if factura.cliente %}
-<p>
-  Cliente:
-  <a href="{% url 'cliente_detalle' factura.cliente.pk %}">{{ factura.cliente.nombre }}</a>
-</p>
-<p>Dirección: {{ factura.cliente.direccion }}</p>
-<p>Teléfono: {{ factura.cliente.telefono }}</p>
-{% else %}
-<p>Cliente: {{ factura.nombre_cliente }}</p>
-{% endif %}
-<p>Método de pago: {{ factura.metodo_pago }}</p>
+  <!-- Información del Cliente -->
+  <div class="col-md-6">
+    <div class="card shadow-sm">
+      <div class="card-header bg-gradient-primary text-white">
+        <h5 class="mb-0"><i class="fas fa-user me-2"></i>Información del Cliente</h5>
+      </div>
+      <div class="card-body">
+        {% if factura.cliente %}
+        <p class="mb-2">
+          <strong><i class="fas fa-user-circle me-2 text-primary"></i>Nombre:</strong>
+          <a href="{% url 'cliente_detalle' factura.cliente.pk %}" class="text-primary">{{ factura.cliente.nombre }}</a>
+        </p>
+        <p class="mb-2">
+          <strong><i class="fas fa-map-marker-alt me-2 text-primary"></i>Dirección:</strong>
+          <span>{{ factura.cliente.direccion }}</span>
+        </p>
+        <p class="mb-0">
+          <strong><i class="fas fa-phone me-2 text-primary"></i>Teléfono:</strong>
+          <span>{{ factura.cliente.telefono }}</span>
+        </p>
+        {% else %}
+        <p class="mb-0">
+          <strong>Cliente:</strong>
+          <span class="badge bg-secondary">{{ factura.nombre_cliente }}</span>
+        </p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
 
-<hr />
+<!-- Detalle de Productos -->
+<div class="card shadow-sm mb-4">
+  <div class="card-header bg-gradient-primary text-white">
+    <h5 class="mb-0"><i class="fas fa-boxes me-2"></i>Detalle de Productos</h5>
+  </div>
+  <div class="card-body p-0">
+    {% if detalles %}
+    <div class="table-responsive">
+      <table class="table table-hover mb-0">
+        <thead class="table-light">
+          <tr>
+            <th><i class="fas fa-box me-2"></i>Producto</th>
+            <th class="text-center"><i class="fas fa-hashtag me-2"></i>Cantidad</th>
+            <th class="text-end"><i class="fas fa-dollar-sign me-2"></i>Precio U.</th>
+            <th class="text-end"><i class="fas fa-calculator me-2"></i>Subtotal</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for d in detalles %}
+          <tr>
+            <td><strong>{{ d.producto.nombre }}</strong></td>
+            <td class="text-center">
+              <span class="badge bg-info">{{ d.cantidad }}</span>
+            </td>
+            <td class="text-end">RD$ {{ d.precio_unitario }}</td>
+            <td class="text-end"><strong>RD$ {{ d.subtotal }}</strong></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="p-4 text-center text-muted">
+      <i class="fas fa-inbox fa-3x mb-3"></i>
+      <p>No hay productos en esta factura</p>
+    </div>
+    {% endif %}
+  </div>
+</div>
 
-<table border="1" width="100%">
-  <thead>
-    <tr>
-      <th>Producto</th>
-      <th>Cantidad</th>
-      <th>Precio U.</th>
-      <th>Subtotal</th>
-    </tr>
-  </thead>
-  <tbody>
-    {% for d in detalles %}
-    <tr>
-      <td>{{ d.producto.nombre }}</td>
-      <td>{{ d.cantidad }}</td>
-      <td>{{ d.precio_unitario }}</td>
-      <td>{{ d.subtotal }}</td>
-    </tr>
-    {% endfor %}
-  </tbody>
-</table>
+<!-- Resumen Financiero -->
+<div class="row">
+  <div class="col-md-8"></div>
+  <div class="col-md-4">
+    <div class="card shadow-sm border-primary">
+      <div class="card-header bg-primary text-white">
+        <h5 class="mb-0"><i class="fas fa-calculator me-2"></i>Resumen Financiero</h5>
+      </div>
+      <div class="card-body">
+        <div class="row mb-3">
+          <div class="col-6">
+            <p class="mb-1"><strong>Subtotal:</strong></p>
+          </div>
+          <div class="col-6 text-end">
+            <p class="mb-1">
+              <span class="badge bg-light text-dark">RD$ {{ factura.subtotal }}</span>
+            </p>
+          </div>
+        </div>
 
-<hr />
+        <div class="row mb-3">
+          <div class="col-6">
+            <p class="mb-1"><strong>ITBIS:</strong></p>
+          </div>
+          <div class="col-6 text-end">
+            <p class="mb-1">
+              <span class="badge bg-warning">RD$ {{ factura.itbis }}</span>
+            </p>
+          </div>
+        </div>
 
-<p>Subtotal: {{ factura.subtotal }}</p>
-<p>ITBIS: {{ factura.itbis }}</p>
-<p><strong>Total: {{ factura.total }}</strong></p>
+        <hr />
+
+        <div class="row">
+          <div class="col-6">
+            <h5 class="mb-0"><strong>Total:</strong></h5>
+          </div>
+          <div class="col-6 text-end">
+            <h5 class="mb-0">
+              <span class="badge bg-success" style="font-size: 1.1rem;">RD$ {{ factura.total }}</span>
+            </h5>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Botones de Acción -->
+<div class="d-flex gap-2 mt-4">
+  <a href="{% url 'descargar_factura' factura.numero_factura %}" class="btn btn-primary btn-lg">
+    <i class="fas fa-download me-2"></i>Descargar PDF
+  </a>
+  <a href="{% url 'ventas' %}" class="btn btn-secondary btn-lg">
+    <i class="fas fa-arrow-left me-2"></i>Volver
+  </a>
+</div>
 
 {% endblock %}

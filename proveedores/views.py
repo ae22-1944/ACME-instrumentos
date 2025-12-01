@@ -31,14 +31,6 @@ def crear_editar_proveedor(request, pk=None):
     )
 
 
-def editar_proveedor(request, pk):
-    proveedor = get_object_or_404(Proveedor, pk=pk)
-    return render(
-        request,
-        "proveedor_form.html",
-        {"form": ProveedorForm(instance=proveedor)},
-    )
-
 
 def borrar_proveedor(request, pk):
     proveedor = get_object_or_404(Proveedor, pk=pk)
